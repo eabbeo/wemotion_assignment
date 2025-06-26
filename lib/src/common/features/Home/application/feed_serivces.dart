@@ -12,16 +12,17 @@ class FeedSerivces {
       Uri.parse('$baseUrl/feed?page=$page&page_size=5'),
     );
 
-    try {
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
+    // try {
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
 
-        return FeedModel.fromJson(data);
-      } else {
-        throw Exception('Unexpected response format');
-      }
-    } catch (e) {
-      throw Exception(e);
+      return FeedModel.fromJson(data);
+    } 
+    else {
+      throw Exception('Unexpected response format');
     }
+    //  } catch (e) {
+    // throw Exception(e);
+    //  }
   }
 }

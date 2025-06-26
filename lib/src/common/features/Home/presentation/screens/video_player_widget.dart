@@ -41,7 +41,6 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
                 setState(() {
                   isError = true;
                 });
-                print('Video initialization error: $error');
               });
   }
 

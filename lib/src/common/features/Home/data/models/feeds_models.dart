@@ -16,26 +16,17 @@ class FeedModel {
   factory FeedModel.fromRawJson(String str) =>
       FeedModel.fromJson(json.decode(str));
 
-  String toRawJson() => json.encode(toJson());
-
   factory FeedModel.fromJson(Map<String, dynamic> json) => FeedModel(
     page: json["page"],
     maxPageSize: json["max_page_size"],
     pageSize: json["page_size"],
     posts: List<Post>.from(json["posts"].map((x) => Post.fromJson(x))),
   );
-
-  Map<String, dynamic> toJson() => {
-    "page": page,
-    "max_page_size": maxPageSize,
-    "page_size": pageSize,
-    "posts": List<dynamic>.from(posts.map((x) => x.toJson())),
-  };
 }
 
 class Post {
   final int id;
-  final List<dynamic> category;
+  final List<dynamic>? category;
   final String slug;
   final dynamic parentVideoId;
   final int childVideoCount;
@@ -63,7 +54,7 @@ class Post {
 
   Post({
     required this.id,
-    required this.category,
+    this.category,
     required this.slug,
     required this.parentVideoId,
     required this.childVideoCount,
@@ -92,11 +83,9 @@ class Post {
 
   factory Post.fromRawJson(String str) => Post.fromJson(json.decode(str));
 
-  String toRawJson() => json.encode(toJson());
-
   factory Post.fromJson(Map<String, dynamic> json) => Post(
     id: json["id"],
-    category: List<dynamic>.from(json["category"].map((x) => x)),
+    category: ["category"],
     slug: json["slug"],
     parentVideoId: json["parent_video_id"],
     childVideoCount: json["child_video_count"],
@@ -122,33 +111,4 @@ class Post {
     votings: List<dynamic>.from(json["votings"].map((x) => x)),
     tags: List<dynamic>.from(json["tags"].map((x) => x)),
   );
-
-  Map<String, dynamic> toJson() => {
-    "id": id,
-    "category": List<dynamic>.from(category.map((x) => x)),
-    "slug": slug,
-    "parent_video_id": parentVideoId,
-    "child_video_count": childVideoCount,
-    "title": title,
-    "identifier": identifier,
-    "comment_count": commentCount,
-    "upvote_count": upvoteCount,
-    "view_count": viewCount,
-    "share_count": shareCount,
-    "tag_count": tagCount,
-    "video_link": videoLink,
-    "is_locked": isLocked,
-    "created_at": createdAt,
-    "first_name": firstName,
-    "last_name": lastName,
-    "username": username,
-    "upvoted": upvoted,
-    "bookmarked": bookmarked,
-    "thumbnail_url": thumbnailUrl,
-    "following": following,
-    "picture_url": pictureUrl,
-    "voting_count": votingCount,
-    "votings": List<dynamic>.from(votings.map((x) => x)),
-    "tags": List<dynamic>.from(tags.map((x) => x)),
-  };
 }
