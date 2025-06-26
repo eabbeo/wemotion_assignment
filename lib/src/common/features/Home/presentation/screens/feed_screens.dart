@@ -1,4 +1,3 @@
-import 'package:cached_video_player_plus/cached_video_player_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wemotion_mobile/src/common/features/Home/data/provider/feed_provider.dart';
@@ -40,13 +39,12 @@ class _FeedScreenState extends State<FeedScreen> {
           scrollDirection: Axis.vertical,
           itemCount: feedProvider.feeds.length,
           itemBuilder: (context, index) {
-            final feed = feedProvider.feeds[index];
             return PageView.builder(
-              itemCount: feed.posts.length,
+              itemCount: feedProvider.feeds[0].posts.length,
               scrollDirection: Axis.vertical,
               itemBuilder: (context, index) {
                 return VideoPlayerWidget(
-                  feedProvider.feeds[index].posts[index].videoLink,
+                  feedProvider.feeds[0].posts[index].videoLink,
                 );
               },
             );
