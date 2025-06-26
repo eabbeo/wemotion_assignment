@@ -14,18 +14,17 @@ class FeedProvider extends ChangeNotifier {
     isLoading = true;
     notifyListeners();
 
-    //  try {
-    final newFeed = await api.fetchFeeds(currentPage);
-    if (newFeed != null) {
-      feeds.add(newFeed);
-      currentPage++;
+    try {
+      final newFeed = await api.fetchFeeds(currentPage);
+      if (newFeed != null) {
+        feeds.add(newFeed);
+        currentPage++;
+      }
+    } catch (e) {
+      print("Failed to load feeds: $e");
+    } finally {
+      isLoading = false;
+      notifyListeners();
     }
-    //  } catch (e) {
-    // You can add error handling or logging here
-    // print("Failed to load feeds: $e");
-    //  } finally {
-    isLoading = false;
-    notifyListeners();
-    //  }
   }
 }

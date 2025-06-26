@@ -25,6 +25,7 @@ class _FeedScreenState extends State<FeedScreen> {
   @override
   Widget build(BuildContext context) {
     final feedProvider = Provider.of<FeedProvider>(context);
+    final screenSize = MediaQuery.of(context).size;
 
     return Scaffold(
       // backgroundColor: Colors.black,
@@ -35,20 +36,51 @@ class _FeedScreenState extends State<FeedScreen> {
           }
           return true;
         },
-        child: PageView.builder(
-          scrollDirection: Axis.vertical,
-          itemCount: feedProvider.feeds.length,
-          itemBuilder: (context, index) {
-            return PageView.builder(
-              itemCount: feedProvider.feeds[0].posts.length,
+        child: Stack(
+          children: [
+            PageView.builder(
               scrollDirection: Axis.vertical,
+              itemCount: feedProvider.feeds.length,
               itemBuilder: (context, index) {
-                return VideoPlayerWidget(
-                  feedProvider.feeds[0].posts[index].videoLink,
+                return PageView.builder(
+                  itemCount: feedProvider.feeds[0].posts.length,
+                  scrollDirection: Axis.vertical,
+                  itemBuilder: (context, index) {
+                    return VideoPlayerWidget(
+                      feedProvider.feeds[0].posts[index].videoLink,
+                    );
+                  },
                 );
               },
-            );
-          },
+            ),
+
+            //
+            Positioned(
+              bottom: 0,
+              child: SizedBox(
+                width: screenSize.width,
+
+                child: Row(
+                  children: [
+                    //left design side
+                    Container(
+                      width: screenSize.width * 0.7,
+                      height: 100,
+                      color: Colors.blue,
+                    ),
+                    //right design side
+                    Container(
+                      width: screenSize.width * 0.3,
+                      height: 100,
+                      color: Colors.yellow,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            //
+          ],
         ),
       ),
     );

@@ -50,17 +50,6 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
     super.dispose();
   }
 
-  // Toggle play/pause
-  // void playPause() {
-  //   setState(() {
-  //     if (controller.value.isPlaying) {
-  //       controller.pause();
-  //     } else {
-  //       controller.play();
-  //     }
-  //   });
-  // }
-
   @override
   Widget build(BuildContext context) {
     return Center(
