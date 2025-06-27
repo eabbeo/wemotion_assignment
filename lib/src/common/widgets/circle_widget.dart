@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wemotion_mobile/src/common/utils/app_colors/app_colors.dart';
 
 class CircleWithFiveDirections extends StatelessWidget {
   const CircleWithFiveDirections({super.key});
@@ -17,8 +18,8 @@ class CircleWithFiveDirections extends StatelessWidget {
         children: [
           // Main Central Circle
           Container(
-            width: mainCircleSize,
-            height: mainCircleSize,
+            width: 15,
+            height: 15,
             decoration: const BoxDecoration(
               shape: BoxShape.circle,
               // color: Colors.blue,
@@ -33,25 +34,25 @@ class CircleWithFiveDirections extends StatelessWidget {
           // Top (North)
           Positioned(
             top: 0,
-            child: smallCircle(color: Colors.red, label: 'N'),
+            child: smallCircle(color: AppColors.whiteColor, label: 'N'),
           ),
 
           // Bottom (South)
           Positioned(
             bottom: 0,
-            child: smallCircle(color: Colors.green, label: 'S'),
+            child: smallCircle(color: AppColors.whiteColor, label: 'S'),
           ),
 
           // Left (West)
           Positioned(
             left: 0,
-            child: smallCircle(color: Colors.orange, label: 'W'),
+            child: smallCircle(color: AppColors.whiteColor, label: 'W'),
           ),
 
           // Right (East)
           Positioned(
             right: 0,
-            child: smallCircle(color: Colors.purple, label: 'E'),
+            child: smallCircle(color: AppColors.whiteColor, label: 'E'),
           ),
 
           // Middle Circle on top of the main one
@@ -60,13 +61,10 @@ class CircleWithFiveDirections extends StatelessWidget {
             height: middleCircleSize,
             decoration: const BoxDecoration(
               shape: BoxShape.circle,
-              color: Colors.black,
+              color: AppColors.pinkColor,
             ),
             alignment: Alignment.center,
-            child: const Text(
-              'M',
-              style: TextStyle(color: Colors.white, fontSize: 16),
-            ),
+            child: const Text('M', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -82,7 +80,7 @@ class CircleWithFiveDirections extends StatelessWidget {
       child: Text(
         label ?? '',
         style: const TextStyle(
-          color: Colors.white,
+          color: AppColors.blackColor,
           fontWeight: FontWeight.bold,
         ),
       ),

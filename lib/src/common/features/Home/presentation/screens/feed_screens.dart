@@ -2,7 +2,9 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wemotion_mobile/src/common/features/Home/data/provider/feed_provider.dart';
+import 'package:wemotion_mobile/src/common/features/Home/presentation/screens/next_page.dart';
 import 'package:wemotion_mobile/src/common/features/Home/presentation/screens/video_player_widget.dart';
+import 'package:wemotion_mobile/src/common/utils/app_colors/app_colors.dart';
 import 'package:wemotion_mobile/src/common/widgets/circle_widget.dart';
 
 class FeedScreen extends StatefulWidget {
@@ -45,30 +47,68 @@ class _FeedScreenState extends State<FeedScreen> {
               scrollDirection: Axis.vertical,
               itemCount: feedProvider.feeds.length,
               itemBuilder: (context, index) {
-                return PageView.builder(
-                  itemCount: feedProvider.feeds[0].posts.length,
-                  scrollDirection: Axis.vertical,
-                  itemBuilder: (context, index) {
-                    return VideoPlayerWidget(
-                      feedProvider.feeds[0].posts[index].videoLink,
-                    );
+                return GestureDetector(
+                  onHorizontalDragEnd: (details) {
+                    // Detect horizontal swipe direction
+                    if (details.primaryVelocity! < 0) {
+                      // Swiped right to left
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => NextPage()),
+                      );
+                    }
+                    // else if (details.primaryVelocity! < 0) {
+                    //   // Swiped left to right
+                    //   Navigator.pop(context); // or navigate to previous page
+                    // }
                   },
-                  onPageChanged: (value) {
-                    setState(() {
-                      currentIndex = value;
-                    });
-                  },
+                  child: PageView.builder(
+                    itemCount: feedProvider.feeds[0].posts.length,
+                    scrollDirection: Axis.vertical,
+                    itemBuilder: (context, index) {
+                      return VideoPlayerWidget(
+                        feedProvider.feeds[0].posts[index].videoLink,
+                      );
+                    },
+                    onPageChanged: (value) {
+                      setState(() {
+                        currentIndex = value;
+                      });
+                    },
+                  ),
                 );
               },
             ),
+
+            // PageView.builder(
+            //   scrollDirection: Axis.vertical,
+            //   itemCount: feedProvider.feeds.length,
+            //   itemBuilder: (context, index) {
+            //     return PageView.builder(
+            //       itemCount: feedProvider.feeds[0].posts.length,
+            //       scrollDirection: Axis.vertical,
+            //       itemBuilder: (context, index) {
+            //         return VideoPlayerWidget(
+            //           feedProvider.feeds[0].posts[index].videoLink,
+            //         );
+            //       },
+            //       onPageChanged: (value) {
+            //         setState(() {
+            //           currentIndex = value;
+            //         });
+            //       },
+            //     );
+            //   },
+            // ),
 
             //
             Positioned(
               bottom: 0,
               child: SizedBox(
                 width: screenSize.width,
-
+                // color: Colors.red,
                 child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     //left design side
                     SizedBox(
@@ -147,8 +187,39 @@ class _FeedScreenState extends State<FeedScreen> {
                     //right design side
                     SizedBox(
                       width: screenSize.width * 0.3,
-                      height: 100,
-                      child: CircleWithFiveDirections(),
+                      //height: 100,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        spacing: 15,
+                        children: [
+                          CircleAvatar(
+                            backgroundColor: AppColors.greyColor.withValues(
+                              alpha: 0.5,
+                            ),
+                          ),
+                          CircleAvatar(
+                            backgroundColor: AppColors.greyColor.withValues(
+                              alpha: 0.5,
+                            ),
+                          ),
+                          CircleAvatar(
+                            backgroundColor: AppColors.greyColor.withValues(
+                              alpha: 0.5,
+                            ),
+                            child: Icon(
+                              Icons.more_vert,
+                              color: AppColors.whiteColor,
+                            ),
+                          ),
+                          SizedBox(height: 10),
+                          SizedBox(
+                            width: 80,
+                            height: 80,
+                            child: CircleWithFiveDirections(),
+                          ),
+                          SizedBox(height: 10),
+                        ],
+                      ),
                     ),
                   ],
                 ),
