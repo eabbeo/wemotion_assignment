@@ -21,7 +21,7 @@ class FeedProvider extends ChangeNotifier {
         currentPage++;
       }
     } catch (e) {
-      print("Failed to load feeds: $e");
+      throw Exception(e);
     } finally {
       isLoading = false;
       notifyListeners();
