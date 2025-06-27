@@ -60,10 +60,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
               child: Center(child: const Text('Error loading video')),
             )
           : controller.value.isInitialized
-          ? AspectRatio(
-              aspectRatio: controller.value.aspectRatio,
-              child: CachedVideoPlayerPlus(controller),
-            )
+          ? CachedVideoPlayerPlus(controller)
           : const CircularProgressIndicator.adaptive(),
     );
   }
