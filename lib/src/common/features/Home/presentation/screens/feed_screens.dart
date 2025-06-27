@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import 'package:wemotion_mobile/src/common/features/Home/data/provider/feed_provider.dart';
 import 'package:wemotion_mobile/src/common/features/Home/presentation/screens/next_page.dart';
 import 'package:wemotion_mobile/src/common/features/Home/presentation/screens/video_player_widget.dart';
+import 'package:wemotion_mobile/src/common/features/post_replies/data/provider/reply_provider.dart';
+import 'package:wemotion_mobile/src/common/features/post_replies/presentation/screens/post_replies_screen.dart';
 import 'package:wemotion_mobile/src/common/utils/app_colors/app_colors.dart';
 import 'package:wemotion_mobile/src/common/widgets/circle_widget.dart';
 
@@ -31,6 +33,7 @@ class _FeedScreenState extends State<FeedScreen> {
   Widget build(BuildContext context) {
     final feedProvider = Provider.of<FeedProvider>(context);
     final screenSize = MediaQuery.of(context).size;
+    final postReply = Provider.of<PostReplyProvider>(context, listen: false);
 
     return Scaffold(
       // backgroundColor: Colors.black,
@@ -51,10 +54,15 @@ class _FeedScreenState extends State<FeedScreen> {
                   onHorizontalDragEnd: (details) {
                     // Detect horizontal swipe direction
                     if (details.primaryVelocity! < 0) {
+                      //passing feed id to post or replies provider
+                      postReply.id = feedProvider.feeds[0].posts[index].id;
+                      postReply.loadMorePostReplies();
                       // Swiped right to left
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => NextPage()),
+                        MaterialPageRoute(
+                          builder: (context) => PostRepliesScreen(),
+                        ),
                       );
                     }
                     // else if (details.primaryVelocity! < 0) {

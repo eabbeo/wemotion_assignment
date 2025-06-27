@@ -3,7 +3,7 @@ import 'package:wemotion_mobile/src/common/constants/app_constants.dart';
 import 'package:wemotion_mobile/src/common/features/post_replies/application/post_reply_services.dart';
 import 'package:wemotion_mobile/src/common/features/post_replies/data/models/replies_model.dart';
 
-class ReplyProvider extends ChangeNotifier {
+class PostReplyProvider extends ChangeNotifier {
   bool isLoading = false;
   List<RepliesModel> postReplies = [];
   int? _id;

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wemotion_mobile/src/common/features/Home/data/provider/feed_provider.dart';
 import 'package:wemotion_mobile/src/common/features/Home/presentation/screens/feed_screens.dart';
-
+import 'package:wemotion_mobile/src/common/features/post_replies/data/provider/reply_provider.dart';
 
 void main() {
   runApp(const MyApp());
@@ -15,7 +15,10 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-      providers: [ChangeNotifierProvider(create: (context) => FeedProvider())],
+      providers: [
+        ChangeNotifierProvider(create: (context) => FeedProvider()),
+        ChangeNotifierProvider(create: (context) => PostReplyProvider()),
+      ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'Flutter Demo',
