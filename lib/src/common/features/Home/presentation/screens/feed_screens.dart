@@ -1,8 +1,9 @@
+import 'dart:developer';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wemotion_mobile/src/common/features/Home/data/provider/feed_provider.dart';
-import 'package:wemotion_mobile/src/common/features/Home/presentation/screens/next_page.dart';
 import 'package:wemotion_mobile/src/common/features/Home/presentation/screens/video_player_widget.dart';
 import 'package:wemotion_mobile/src/common/features/post_replies/data/provider/reply_provider.dart';
 import 'package:wemotion_mobile/src/common/features/post_replies/presentation/screens/post_replies_screen.dart';
@@ -55,7 +56,8 @@ class _FeedScreenState extends State<FeedScreen> {
                     // Detect horizontal swipe direction
                     if (details.primaryVelocity! < 0) {
                       //passing feed id to post or replies provider
-                      postReply.id = feedProvider.feeds[0].posts[index].id;
+                      postReply.id =
+                          feedProvider.feeds[0].posts[currentIndex ?? 0].id;
                       postReply.loadMorePostReplies();
                       // Swiped right to left
                       Navigator.push(
@@ -65,49 +67,33 @@ class _FeedScreenState extends State<FeedScreen> {
                         ),
                       );
                     }
-                    // else if (details.primaryVelocity! < 0) {
-                    //   // Swiped left to right
-                    //   Navigator.pop(context); // or navigate to previous page
-                    // }
                   },
                   child: PageView.builder(
                     itemCount: feedProvider.feeds[0].posts.length,
                     scrollDirection: Axis.vertical,
                     itemBuilder: (context, index) {
-                      return VideoPlayerWidget(
-                        feedProvider.feeds[0].posts[index].videoLink,
-                      );
+                      return feedProvider.feeds.isEmpty
+                          ? Center(child: CircularProgressIndicator.adaptive())
+                          : VideoPlayerWidget(
+                              feedProvider.feeds[0].posts[index].videoLink,
+                            );
                     },
                     onPageChanged: (value) {
                       setState(() {
                         currentIndex = value;
+                        // postReply.id =
+                        //     feedProvider.feeds[0].posts[currentIndex ?? 0].id;
+                        log('Current index is $value');
+                        log(
+                          'Selected ID is ${feedProvider.feeds[0].posts[currentIndex ?? 0].id}',
+                        );
+                        log('Provider id is ${postReply.id}');
                       });
                     },
                   ),
                 );
               },
             ),
-
-            // PageView.builder(
-            //   scrollDirection: Axis.vertical,
-            //   itemCount: feedProvider.feeds.length,
-            //   itemBuilder: (context, index) {
-            //     return PageView.builder(
-            //       itemCount: feedProvider.feeds[0].posts.length,
-            //       scrollDirection: Axis.vertical,
-            //       itemBuilder: (context, index) {
-            //         return VideoPlayerWidget(
-            //           feedProvider.feeds[0].posts[index].videoLink,
-            //         );
-            //       },
-            //       onPageChanged: (value) {
-            //         setState(() {
-            //           currentIndex = value;
-            //         });
-            //       },
-            //     );
-            //   },
-            // ),
 
             //
             Positioned(
@@ -223,7 +209,33 @@ class _FeedScreenState extends State<FeedScreen> {
                           SizedBox(
                             width: 80,
                             height: 80,
-                            child: CircleWithFiveDirections(),
+                            child: CircleWithFiveDirections(
+                              pointNorth: feedProvider.feeds.isNotEmpty
+                                  ? feedProvider
+                                            .feeds[0]
+                                            .posts[currentIndex ?? 0]
+                                            .parentVideoId ??
+                                        ''
+                                  : '',
+                              pointWest: feedProvider.feeds.isNotEmpty
+                                  ? feedProvider
+                                        .feeds[0]
+                                        .posts[currentIndex ?? 0]
+                                        .childVideoCount
+                                        .toString()
+                                  : '',
+                              pointSouth: feedProvider.feeds.isNotEmpty
+                                  ? feedProvider.feeds[0].posts.length
+                                        .toString()
+                                  : '',
+                              pointEast: feedProvider.feeds.isNotEmpty
+                                  ? feedProvider
+                                        .feeds[0]
+                                        .posts[currentIndex ?? 0]
+                                        .childVideoCount
+                                        .toString()
+                                  : '',
+                            ),
                           ),
                           SizedBox(height: 10),
                         ],

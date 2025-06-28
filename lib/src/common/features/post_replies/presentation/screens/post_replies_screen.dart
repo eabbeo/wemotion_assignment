@@ -56,37 +56,24 @@ class _PostRepliesScreenState extends State<PostRepliesScreen> {
                   onHorizontalDragEnd: (details) {
                     // Detect horizontal swipe direction
                     if (details.primaryVelocity! < 0) {
-                      //passing feed id to post or replies provider
+                      // //passing feed id to post or replies provider
+                      // postReply.id = postProvider.postReplies[0].post[index].id;
 
-                      //
-                      if (postReply.id !=
-                          postProvider.postReplies[0].post[index].id) {
-                        //
-                        postReply.id =
-                            postProvider.postReplies[0].post[index].id;
-                        postReply.postReplies.clear();
-                        postReply.loadMorePostReplies();
-                        //
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => PostRepliesScreen(),
-                          ),
-                        );
-                      } else {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => PostRepliesScreen(),
-                          ),
-                        );
-                      }
-                      log('...Index id is ${postReply.id}');
-                      log('....Provider id is ${postReply.id}');
-                      //
+                      // postReply.loadMorePostReplies();
+                      // //
+                      // Navigator.push(
+                      //   context,
+                      //   MaterialPageRoute(
+                      //     builder: (context) => PostRepliesScreen(),
+                      //   ),
+                      // );
+
+                      // log('...Index id is ${postReply.id}');
+                      // log('....Provider id is ${postReply.id}');
+                      // //
 
                       // Swiped right to left
-                    } else if (details.primaryVelocity! < 0) {
+                    } else if (details.primaryVelocity! > 0) {
                       // Swiped left to right
                       Navigator.pop(context); // or navigate to previous page
                     }
@@ -225,7 +212,12 @@ class _PostRepliesScreenState extends State<PostRepliesScreen> {
                           SizedBox(
                             width: 80,
                             height: 80,
-                            child: CircleWithFiveDirections(),
+                            child: CircleWithFiveDirections(
+                              pointNorth: '',
+                              pointWest: '',
+                              pointSouth: '',
+                              pointEast: '',
+                            ),
                           ),
                           SizedBox(height: 10),
                         ],

@@ -2,7 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:wemotion_mobile/src/common/utils/app_colors/app_colors.dart';
 
 class CircleWithFiveDirections extends StatelessWidget {
-  const CircleWithFiveDirections({super.key});
+  const CircleWithFiveDirections({
+    super.key,
+    required this.pointNorth,
+    required this.pointWest,
+    required this.pointSouth,
+    required this.pointEast,
+  });
+  final String pointNorth;
+  final String pointWest;
+  final String pointSouth;
+  final String pointEast;
 
   @override
   Widget build(BuildContext context) {
@@ -20,40 +30,53 @@ class CircleWithFiveDirections extends StatelessWidget {
           Container(
             width: 15,
             height: 15,
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              // color: Colors.blue,
-            ),
+            decoration: const BoxDecoration(shape: BoxShape.circle),
             alignment: Alignment.center,
-            child: const Text(
-              'C',
-              style: TextStyle(color: Colors.white, fontSize: 20),
-            ),
           ),
 
           // Top (North)
-          Positioned(
-            top: 0,
-            child: smallCircle(color: AppColors.whiteColor, label: 'N'),
-          ),
+          pointNorth.isNotEmpty
+              ? Positioned(
+                  top: 0,
+                  child: smallCircle(
+                    color: AppColors.whiteColor,
+                    label: pointNorth,
+                  ),
+                )
+              : SizedBox(),
 
           // Bottom (South)
-          Positioned(
-            bottom: 0,
-            child: smallCircle(color: AppColors.whiteColor, label: 'S'),
-          ),
+          pointSouth.isNotEmpty
+              ? Positioned(
+                  bottom: 0,
+                  child: smallCircle(
+                    color: AppColors.whiteColor,
+                    label: pointSouth,
+                  ),
+                )
+              : SizedBox(),
 
           // Left (West)
-          Positioned(
-            left: 0,
-            child: smallCircle(color: AppColors.whiteColor, label: 'W'),
-          ),
+          pointWest.isNotEmpty
+              ? Positioned(
+                  left: 0,
+                  child: smallCircle(
+                    color: AppColors.whiteColor,
+                    label: pointWest,
+                  ),
+                )
+              : SizedBox(),
 
           // Right (East)
-          Positioned(
-            right: 0,
-            child: smallCircle(color: AppColors.whiteColor, label: 'E'),
-          ),
+          pointEast.isNotEmpty
+              ? Positioned(
+                  right: 0,
+                  child: smallCircle(
+                    color: AppColors.whiteColor,
+                    label: pointEast,
+                  ),
+                )
+              : SizedBox(),
 
           // Middle Circle on top of the main one
           Container(
