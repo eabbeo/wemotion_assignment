@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -52,64 +50,81 @@ class _PostRepliesScreenState extends State<PostRepliesScreen> {
               scrollDirection: Axis.vertical,
               itemCount: postProvider.postReplies.length,
               itemBuilder: (context, index) {
+                final video = postProvider.postReplies[index].post.first;
+
                 return GestureDetector(
                   onHorizontalDragEnd: (details) {
-                    // Detect horizontal swipe direction
                     if (details.primaryVelocity! < 0) {
-                      //passing feed id to post or replies provider
-
-                      //
-                      if (postReply.id !=
-                          postProvider.postReplies[0].post[index].id) {
-                        //
-                        postReply.id =
-                            postProvider.postReplies[0].post[index].id;
-                        postReply.postReplies.clear();
-                        postReply.loadMorePostReplies();
-                        //
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => PostRepliesScreen(),
-                          ),
-                        );
-                      } else {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => PostRepliesScreen(),
-                          ),
-                        );
-                      }
-                      log('...Index id is ${postReply.id}');
-                      log('....Provider id is ${postReply.id}');
-                      //
-
                       // Swiped right to left
-                    } else if (details.primaryVelocity! < 0) {
-                      // Swiped left to right
-                      Navigator.pop(context); // or navigate to previous page
+                      // Example: Navigate to another page
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => PostRepliesScreen()),
+                      );
+                    } else if (details.primaryVelocity! > 0) {
+                      Navigator.pop(context); // Swiped left to right
                     }
                   },
-                  child: PageView.builder(
-                    itemCount: postProvider.postReplies.length,
-                    scrollDirection: Axis.vertical,
-                    itemBuilder: (context, index) {
-                      return VideoPlayerWidget(
-                        postReply.postReplies.isNotEmpty
-                            ? postProvider.postReplies[0].post[index].videoLink
-                            : '',
-                      );
-                    },
-                    onPageChanged: (value) {
-                      setState(() {
-                        currentIndex = value;
-                      });
-                    },
-                  ),
+                  child: VideoPlayerWidget(video.videoLink),
                 );
               },
+              onPageChanged: (value) {
+                setState(() {
+                  currentIndex = value;
+                });
+              },
             ),
+
+            // PageView.builder(
+            //   scrollDirection: Axis.vertical,
+            //   itemCount: postProvider.postReplies.length,
+            //   itemBuilder: (context, index) {
+            //     return GestureDetector(
+            //       onHorizontalDragEnd: (details) {
+            //         // Detect horizontal swipe direction
+            //         if (details.primaryVelocity! < 0) {
+            //           // //passing feed id to post or replies provider
+            //           // postReply.id = postProvider.postReplies[0].post[index].id;
+
+            //           // postReply.loadMorePostReplies();
+            //           // //
+            //           // Navigator.push(
+            //           //   context,
+            //           //   MaterialPageRoute(
+            //           //     builder: (context) => PostRepliesScreen(),
+            //           //   ),
+            //           // );
+
+            //           // log('...Index id is ${postReply.id}');
+            //           // log('....Provider id is ${postReply.id}');
+            //           // //
+
+            //           // Swiped right to left
+            //         } else if (details.primaryVelocity! > 0) {
+            //           // Swiped left to right
+            //           Navigator.pop(context); // or navigate to previous page
+            //         }
+            //       },
+            //       child: PageView.builder(
+            //         itemCount: postProvider.postReplies.length,
+            //         scrollDirection: Axis.vertical,
+            //         itemBuilder: (context, index) {
+            //           return VideoPlayerWidget(
+            //             postReply.postReplies.isNotEmpty
+            //                 ? postProvider.postReplies[0].post[index].videoLink
+            //                 : '',
+            //           );
+            //         },
+            //         onPageChanged: (value) {
+            //           setState(() {
+            //             currentIndex = value;
+            //           });
+            //         },
+            //       ),
+            //     );
+            //   },
+            // ),
+
             //
             Positioned(
               bottom: 0,
@@ -225,7 +240,13 @@ class _PostRepliesScreenState extends State<PostRepliesScreen> {
                           SizedBox(
                             width: 80,
                             height: 80,
-                            child: CircleWithFiveDirections(),
+                            child: CircleWithFiveDirections(
+                              pointNorth: 0,
+                              pointWest: 0,
+                              pointSouth: 0,
+                              pointEast: 0,
+                              mainCircleColor: Colors.yellow,
+                            ),
                           ),
                           SizedBox(height: 10),
                         ],

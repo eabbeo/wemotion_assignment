@@ -21,6 +21,7 @@ class PostReplyProvider extends ChangeNotifier {
   final PostReplyServices api = PostReplyServices();
 
   Future<void> loadMorePostReplies() async {
+    postReplies.clear();
     if (isLoading) return;
     isLoading = true;
     notifyListeners();

@@ -2,7 +2,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wemotion_mobile/src/common/features/Home/data/provider/feed_provider.dart';
-import 'package:wemotion_mobile/src/common/features/Home/presentation/screens/next_page.dart';
 import 'package:wemotion_mobile/src/common/features/Home/presentation/screens/video_player_widget.dart';
 import 'package:wemotion_mobile/src/common/features/post_replies/data/provider/reply_provider.dart';
 import 'package:wemotion_mobile/src/common/features/post_replies/presentation/screens/post_replies_screen.dart';
@@ -18,6 +17,8 @@ class FeedScreen extends StatefulWidget {
 
 class _FeedScreenState extends State<FeedScreen> {
   int? currentIndex;
+  int? above;
+  int? below;
   @override
   void initState() {
     Future.delayed(Duration(seconds: 1), () {
@@ -34,6 +35,7 @@ class _FeedScreenState extends State<FeedScreen> {
     final feedProvider = Provider.of<FeedProvider>(context);
     final screenSize = MediaQuery.of(context).size;
     final postReply = Provider.of<PostReplyProvider>(context, listen: false);
+    //totalFeeds = feedProvider.feeds[0].posts.length;
 
     return Scaffold(
       // backgroundColor: Colors.black,
@@ -53,9 +55,15 @@ class _FeedScreenState extends State<FeedScreen> {
                 return GestureDetector(
                   onHorizontalDragEnd: (details) {
                     // Detect horizontal swipe direction
-                    if (details.primaryVelocity! < 0) {
+                    if (details.primaryVelocity! < 0 &&
+                        feedProvider
+                                .feeds[0]
+                                .posts[currentIndex ?? 0]
+                                .childVideoCount >
+                            0) {
                       //passing feed id to post or replies provider
-                      postReply.id = feedProvider.feeds[0].posts[index].id;
+                      postReply.id =
+                          feedProvider.feeds[0].posts[currentIndex ?? 0].id;
                       postReply.loadMorePostReplies();
                       // Swiped right to left
                       Navigator.push(
@@ -65,49 +73,29 @@ class _FeedScreenState extends State<FeedScreen> {
                         ),
                       );
                     }
-                    // else if (details.primaryVelocity! < 0) {
-                    //   // Swiped left to right
-                    //   Navigator.pop(context); // or navigate to previous page
-                    // }
                   },
                   child: PageView.builder(
                     itemCount: feedProvider.feeds[0].posts.length,
                     scrollDirection: Axis.vertical,
                     itemBuilder: (context, index) {
-                      return VideoPlayerWidget(
-                        feedProvider.feeds[0].posts[index].videoLink,
-                      );
+                      return feedProvider.feeds.isEmpty
+                          ? Center(child: CircularProgressIndicator.adaptive())
+                          : VideoPlayerWidget(
+                              feedProvider.feeds[0].posts[index].videoLink,
+                            );
                     },
                     onPageChanged: (value) {
                       setState(() {
                         currentIndex = value;
+                        int totalPosts = feedProvider.feeds[0].posts.length;
+                        above = currentIndex!;
+                        below = totalPosts - currentIndex! - 1;
                       });
                     },
                   ),
                 );
               },
             ),
-
-            // PageView.builder(
-            //   scrollDirection: Axis.vertical,
-            //   itemCount: feedProvider.feeds.length,
-            //   itemBuilder: (context, index) {
-            //     return PageView.builder(
-            //       itemCount: feedProvider.feeds[0].posts.length,
-            //       scrollDirection: Axis.vertical,
-            //       itemBuilder: (context, index) {
-            //         return VideoPlayerWidget(
-            //           feedProvider.feeds[0].posts[index].videoLink,
-            //         );
-            //       },
-            //       onPageChanged: (value) {
-            //         setState(() {
-            //           currentIndex = value;
-            //         });
-            //       },
-            //     );
-            //   },
-            // ),
 
             //
             Positioned(
@@ -223,7 +211,23 @@ class _FeedScreenState extends State<FeedScreen> {
                           SizedBox(
                             width: 80,
                             height: 80,
-                            child: CircleWithFiveDirections(),
+                            child: CircleWithFiveDirections(
+                              pointNorth: above ?? 0,
+                              pointWest: 0,
+                              pointSouth:
+                                  feedProvider.feeds.isEmpty && below == null
+                                  ? 0
+                                  : below != null
+                                  ? below!
+                                  : feedProvider.feeds[0].posts.length - 1,
+                              pointEast: feedProvider.feeds.isNotEmpty
+                                  ? feedProvider
+                                        .feeds[0]
+                                        .posts[currentIndex ?? 0]
+                                        .childVideoCount
+                                  : 0,
+                              mainCircleColor: Colors.deepPurple,
+                            ),
                           ),
                           SizedBox(height: 10),
                         ],
