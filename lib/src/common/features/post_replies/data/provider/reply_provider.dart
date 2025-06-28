@@ -6,6 +6,7 @@ import 'package:wemotion_mobile/src/common/features/post_replies/data/models/rep
 class PostReplyProvider extends ChangeNotifier {
   bool isLoading = false;
   List<RepliesModel> postReplies = [];
+
   int? _id;
 
   int get id => _id!;

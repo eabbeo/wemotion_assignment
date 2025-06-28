@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -15,24 +17,25 @@ class PostRepliesScreen extends StatefulWidget {
 
 class _PostRepliesScreenState extends State<PostRepliesScreen> {
   int? currentIndex;
-  @override
-  void initState() {
-    Future.delayed(Duration(seconds: 1), () {
-      if (!mounted) return;
-      final postProvider = Provider.of<PostReplyProvider>(
-        context,
-        listen: false,
-      );
-      postProvider.loadMorePostReplies();
-    });
+  // @override
+  // void initState() {
+  //   Future.delayed(Duration(seconds: 1), () {
+  //     if (!mounted) return;
+  //     final postProvider = Provider.of<PostReplyProvider>(
+  //       context,
+  //       listen: false,
+  //     );
+  //     postProvider.loadMorePostReplies();
+  //   });
 
-    super.initState();
-  }
+  //   super.initState();
+  // }
 
   @override
   Widget build(BuildContext context) {
     final postProvider = Provider.of<PostReplyProvider>(context);
     final screenSize = MediaQuery.of(context).size;
+    final postReply = Provider.of<PostReplyProvider>(context, listen: false);
 
     return Scaffold(
       // backgroundColor: Colors.black,
@@ -53,11 +56,36 @@ class _PostRepliesScreenState extends State<PostRepliesScreen> {
                   onHorizontalDragEnd: (details) {
                     // Detect horizontal swipe direction
                     if (details.primaryVelocity! < 0) {
+                      //passing feed id to post or replies provider
+
+                      //
+                      if (postReply.id !=
+                          postProvider.postReplies[0].post[index].id) {
+                        //
+                        postReply.id =
+                            postProvider.postReplies[0].post[index].id;
+                        postReply.postReplies.clear();
+                        postReply.loadMorePostReplies();
+                        //
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PostRepliesScreen(),
+                          ),
+                        );
+                      } else {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PostRepliesScreen(),
+                          ),
+                        );
+                      }
+                      log('...Index id is ${postReply.id}');
+                      log('....Provider id is ${postReply.id}');
+                      //
+
                       // Swiped right to left
-                      // Navigator.push(
-                      //   context,
-                      //   MaterialPageRoute(builder: (context) => NextPage()),
-                      // );
                     } else if (details.primaryVelocity! < 0) {
                       // Swiped left to right
                       Navigator.pop(context); // or navigate to previous page
@@ -68,7 +96,9 @@ class _PostRepliesScreenState extends State<PostRepliesScreen> {
                     scrollDirection: Axis.vertical,
                     itemBuilder: (context, index) {
                       return VideoPlayerWidget(
-                        postProvider.postReplies[0].post[index].videoLink,
+                        postReply.postReplies.isNotEmpty
+                            ? postProvider.postReplies[0].post[index].videoLink
+                            : '',
                       );
                     },
                     onPageChanged: (value) {
@@ -80,28 +110,6 @@ class _PostRepliesScreenState extends State<PostRepliesScreen> {
                 );
               },
             ),
-
-            // PageView.builder(
-            //   scrollDirection: Axis.vertical,
-            //   itemCount: feedProvider.feeds.length,
-            //   itemBuilder: (context, index) {
-            //     return PageView.builder(
-            //       itemCount: feedProvider.feeds[0].posts.length,
-            //       scrollDirection: Axis.vertical,
-            //       itemBuilder: (context, index) {
-            //         return VideoPlayerWidget(
-            //           feedProvider.feeds[0].posts[index].videoLink,
-            //         );
-            //       },
-            //       onPageChanged: (value) {
-            //         setState(() {
-            //           currentIndex = value;
-            //         });
-            //       },
-            //     );
-            //   },
-            // ),
-
             //
             Positioned(
               bottom: 0,

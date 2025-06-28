@@ -6,9 +6,9 @@ class CircleWithFiveDirections extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double mainCircleSize = 25;
-    double smallCircleSize = 25;
-    double middleCircleSize = 25;
+    double mainCircleSize = 20;
+    double smallCircleSize = 20;
+    double middleCircleSize = 20;
 
     return SizedBox(
       width: mainCircleSize + smallCircleSize * 2,
@@ -64,7 +64,7 @@ class CircleWithFiveDirections extends StatelessWidget {
               color: AppColors.pinkColor,
             ),
             alignment: Alignment.center,
-            child: const Text('M', style: TextStyle(color: Colors.white)),
+            // child: const Text('M', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -73,8 +73,8 @@ class CircleWithFiveDirections extends StatelessWidget {
 
   Widget smallCircle({required Color color, String? label}) {
     return Container(
-      width: 25,
-      height: 25,
+      width: 20,
+      height: 20,
       decoration: BoxDecoration(shape: BoxShape.circle, color: color),
       alignment: Alignment.center,
       child: Text(
