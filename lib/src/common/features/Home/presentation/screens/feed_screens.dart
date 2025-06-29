@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -19,6 +17,8 @@ class FeedScreen extends StatefulWidget {
 
 class _FeedScreenState extends State<FeedScreen> {
   int? currentIndex;
+  int? above;
+  int? below;
   @override
   void initState() {
     Future.delayed(Duration(seconds: 1), () {
@@ -35,6 +35,7 @@ class _FeedScreenState extends State<FeedScreen> {
     final feedProvider = Provider.of<FeedProvider>(context);
     final screenSize = MediaQuery.of(context).size;
     final postReply = Provider.of<PostReplyProvider>(context, listen: false);
+    //totalFeeds = feedProvider.feeds[0].posts.length;
 
     return Scaffold(
       // backgroundColor: Colors.black,
@@ -54,7 +55,12 @@ class _FeedScreenState extends State<FeedScreen> {
                 return GestureDetector(
                   onHorizontalDragEnd: (details) {
                     // Detect horizontal swipe direction
-                    if (details.primaryVelocity! < 0) {
+                    if (details.primaryVelocity! < 0 &&
+                        feedProvider
+                                .feeds[0]
+                                .posts[currentIndex ?? 0]
+                                .childVideoCount >
+                            0) {
                       //passing feed id to post or replies provider
                       postReply.id =
                           feedProvider.feeds[0].posts[currentIndex ?? 0].id;
@@ -81,13 +87,9 @@ class _FeedScreenState extends State<FeedScreen> {
                     onPageChanged: (value) {
                       setState(() {
                         currentIndex = value;
-                        // postReply.id =
-                        //     feedProvider.feeds[0].posts[currentIndex ?? 0].id;
-                        log('Current index is $value');
-                        log(
-                          'Selected ID is ${feedProvider.feeds[0].posts[currentIndex ?? 0].id}',
-                        );
-                        log('Provider id is ${postReply.id}');
+                        int totalPosts = feedProvider.feeds[0].posts.length;
+                        above = currentIndex!;
+                        below = totalPosts - currentIndex! - 1;
                       });
                     },
                   ),
@@ -210,31 +212,17 @@ class _FeedScreenState extends State<FeedScreen> {
                             width: 80,
                             height: 80,
                             child: CircleWithFiveDirections(
-                              pointNorth: feedProvider.feeds.isNotEmpty
-                                  ? feedProvider
-                                            .feeds[0]
-                                            .posts[currentIndex ?? 0]
-                                            .parentVideoId ??
-                                        ''
-                                  : '',
-                              pointWest: feedProvider.feeds.isNotEmpty
-                                  ? feedProvider
-                                        .feeds[0]
-                                        .posts[currentIndex ?? 0]
-                                        .childVideoCount
-                                        .toString()
-                                  : '',
-                              pointSouth: feedProvider.feeds.isNotEmpty
-                                  ? feedProvider.feeds[0].posts.length
-                                        .toString()
-                                  : '',
+                              pointNorth: above ?? 0,
+                              pointWest: 0,
+                              pointSouth: below ?? 0,
+
                               pointEast: feedProvider.feeds.isNotEmpty
                                   ? feedProvider
                                         .feeds[0]
                                         .posts[currentIndex ?? 0]
                                         .childVideoCount
-                                        .toString()
-                                  : '',
+                                  : 0,
+                              mainCircleColor: Colors.deepPurple,
                             ),
                           ),
                           SizedBox(height: 10),

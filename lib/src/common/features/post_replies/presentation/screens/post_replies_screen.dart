@@ -1,4 +1,3 @@
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -212,10 +211,11 @@ class _PostRepliesScreenState extends State<PostRepliesScreen> {
                             width: 80,
                             height: 80,
                             child: CircleWithFiveDirections(
-                              pointNorth: '',
-                              pointWest: '',
-                              pointSouth: '',
-                              pointEast: '',
+                              pointNorth: 0,
+                              pointWest: 0,
+                              pointSouth: 0,
+                              pointEast: 0,
+                              mainCircleColor: Colors.yellow,
                             ),
                           ),
                           SizedBox(height: 10),

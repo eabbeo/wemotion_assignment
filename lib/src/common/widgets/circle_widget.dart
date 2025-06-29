@@ -8,11 +8,13 @@ class CircleWithFiveDirections extends StatelessWidget {
     required this.pointWest,
     required this.pointSouth,
     required this.pointEast,
+    required this.mainCircleColor,
   });
-  final String pointNorth;
-  final String pointWest;
-  final String pointSouth;
-  final String pointEast;
+  final int pointNorth;
+  final int pointWest;
+  final int pointSouth;
+  final int pointEast;
+  final Color? mainCircleColor;
 
   @override
   Widget build(BuildContext context) {
@@ -35,45 +37,45 @@ class CircleWithFiveDirections extends StatelessWidget {
           ),
 
           // Top (North)
-          pointNorth.isNotEmpty
+          pointNorth > 0
               ? Positioned(
                   top: 0,
                   child: smallCircle(
                     color: AppColors.whiteColor,
-                    label: pointNorth,
+                    label: pointNorth.toString(),
                   ),
                 )
               : SizedBox(),
 
           // Bottom (South)
-          pointSouth.isNotEmpty
+          pointSouth > 0
               ? Positioned(
                   bottom: 0,
                   child: smallCircle(
                     color: AppColors.whiteColor,
-                    label: pointSouth,
+                    label: pointSouth.toString(),
                   ),
                 )
               : SizedBox(),
 
           // Left (West)
-          pointWest.isNotEmpty
+          pointWest > 0
               ? Positioned(
                   left: 0,
                   child: smallCircle(
                     color: AppColors.whiteColor,
-                    label: pointWest,
+                    label: pointWest.toString(),
                   ),
                 )
               : SizedBox(),
 
           // Right (East)
-          pointEast.isNotEmpty
+          pointEast > 0
               ? Positioned(
                   right: 0,
                   child: smallCircle(
                     color: AppColors.whiteColor,
-                    label: pointEast,
+                    label: pointEast.toString(),
                   ),
                 )
               : SizedBox(),
@@ -82,12 +84,11 @@ class CircleWithFiveDirections extends StatelessWidget {
           Container(
             width: middleCircleSize,
             height: middleCircleSize,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: AppColors.pinkColor,
+              color: mainCircleColor,
             ),
             alignment: Alignment.center,
-            // child: const Text('M', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
