@@ -214,8 +214,18 @@ class _FeedScreenState extends State<FeedScreen> {
                             child: CircleWithFiveDirections(
                               pointNorth: above ?? 0,
                               pointWest: 0,
-                              pointSouth: below ?? 0,
+                              pointSouth:
+                                  feedProvider.feeds.isEmpty && below == null
+                                  ? 0
+                                  : below != null
+                                  ? below!
+                                  : feedProvider.feeds[0].posts.length - 1,
 
+                              //  feedProvider.feeds.isNotEmpty
+                              //     ? below ?? 0
+                              //     : feedProvider.feeds.isNotEmpty
+                              //     ? feedProvider.feeds[0].posts.length - 1
+                              //     : 0,
                               pointEast: feedProvider.feeds.isNotEmpty
                                   ? feedProvider
                                         .feeds[0]
