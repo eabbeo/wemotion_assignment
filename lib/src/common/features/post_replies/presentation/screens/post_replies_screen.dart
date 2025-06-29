@@ -1,7 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:wemotion_mobile/src/common/features/Home/presentation/screens/video_player_widget.dart';
+import 'package:wemotion_mobile/src/common/widgets/video_player_widget.dart';
 import 'package:wemotion_mobile/src/common/features/post_replies/data/provider/reply_provider.dart';
 import 'package:wemotion_mobile/src/common/utils/app_colors/app_colors.dart';
 import 'package:wemotion_mobile/src/common/widgets/circle_widget.dart';
@@ -15,32 +15,21 @@ class PostRepliesScreen extends StatefulWidget {
 
 class _PostRepliesScreenState extends State<PostRepliesScreen> {
   int? currentIndex;
-  // @override
-  // void initState() {
-  //   Future.delayed(Duration(seconds: 1), () {
-  //     if (!mounted) return;
-  //     final postProvider = Provider.of<PostReplyProvider>(
-  //       context,
-  //       listen: false,
-  //     );
-  //     postProvider.loadMorePostReplies();
-  //   });
-
-  //   super.initState();
-  // }
+  String? above;
+  String? below;
 
   @override
   Widget build(BuildContext context) {
     final postProvider = Provider.of<PostReplyProvider>(context);
     final screenSize = MediaQuery.of(context).size;
-    final postReply = Provider.of<PostReplyProvider>(context, listen: false);
+    //  final postReply = Provider.of<PostReplyProvider>(context, listen: false);
 
     return Scaffold(
       // backgroundColor: Colors.black,
       body: NotificationListener<ScrollNotification>(
         onNotification: (scroll) {
           if (scroll.metrics.pixels == scroll.metrics.maxScrollExtent) {
-            postProvider.loadMorePostReplies();
+            // postProvider.loadMorePostReplies();
           }
           return true;
         },
@@ -50,80 +39,51 @@ class _PostRepliesScreenState extends State<PostRepliesScreen> {
               scrollDirection: Axis.vertical,
               itemCount: postProvider.postReplies.length,
               itemBuilder: (context, index) {
-                final video = postProvider.postReplies[index].post.first;
-
                 return GestureDetector(
                   onHorizontalDragEnd: (details) {
-                    if (details.primaryVelocity! < 0) {
-                      // Swiped right to left
-                      // Example: Navigate to another page
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => PostRepliesScreen()),
-                      );
-                    } else if (details.primaryVelocity! > 0) {
-                      Navigator.pop(context); // Swiped left to right
+                    // Detect horizontal swipe direction
+                    if (details.primaryVelocity! < 0 &&
+                        postProvider
+                                .postReplies[0]
+                                .post[currentIndex ?? 0]
+                                .childVideoCount >
+                            0) {
+                      // //passing feed id to post or replies provider
+                      // postReply.id =
+                      //     feedProvider.feeds[0].posts[currentIndex ?? 0].id;
+                      // postReply.loadMorePostReplies();
+                      // // Swiped right to left
+                      // Navigator.push(
+                      //   context,
+                      //   MaterialPageRoute(
+                      //     builder: (context) => PostRepliesScreen(),
+                      //   ),
+                      // );
                     }
                   },
-                  child: VideoPlayerWidget(video.videoLink),
+                  child: PageView.builder(
+                    itemCount: postProvider.postReplies[0].post.length,
+                    scrollDirection: Axis.vertical,
+                    itemBuilder: (context, index) {
+                      return postProvider.postReplies.isEmpty
+                          ? Center(child: CircularProgressIndicator.adaptive())
+                          : VideoPlayerWidget(
+                              postProvider.postReplies[0].post[index].videoLink,
+                            );
+                    },
+                    onPageChanged: (value) {
+                      setState(() {
+                        currentIndex = value;
+                        int totalPosts =
+                            postProvider.postReplies[0].post.length;
+                        above = currentIndex!.toString();
+                        below = (totalPosts - currentIndex! - 1).toString();
+                      });
+                    },
+                  ),
                 );
               },
-              onPageChanged: (value) {
-                setState(() {
-                  currentIndex = value;
-                });
-              },
             ),
-
-            // PageView.builder(
-            //   scrollDirection: Axis.vertical,
-            //   itemCount: postProvider.postReplies.length,
-            //   itemBuilder: (context, index) {
-            //     return GestureDetector(
-            //       onHorizontalDragEnd: (details) {
-            //         // Detect horizontal swipe direction
-            //         if (details.primaryVelocity! < 0) {
-            //           // //passing feed id to post or replies provider
-            //           // postReply.id = postProvider.postReplies[0].post[index].id;
-
-            //           // postReply.loadMorePostReplies();
-            //           // //
-            //           // Navigator.push(
-            //           //   context,
-            //           //   MaterialPageRoute(
-            //           //     builder: (context) => PostRepliesScreen(),
-            //           //   ),
-            //           // );
-
-            //           // log('...Index id is ${postReply.id}');
-            //           // log('....Provider id is ${postReply.id}');
-            //           // //
-
-            //           // Swiped right to left
-            //         } else if (details.primaryVelocity! > 0) {
-            //           // Swiped left to right
-            //           Navigator.pop(context); // or navigate to previous page
-            //         }
-            //       },
-            //       child: PageView.builder(
-            //         itemCount: postProvider.postReplies.length,
-            //         scrollDirection: Axis.vertical,
-            //         itemBuilder: (context, index) {
-            //           return VideoPlayerWidget(
-            //             postReply.postReplies.isNotEmpty
-            //                 ? postProvider.postReplies[0].post[index].videoLink
-            //                 : '',
-            //           );
-            //         },
-            //         onPageChanged: (value) {
-            //           setState(() {
-            //             currentIndex = value;
-            //           });
-            //         },
-            //       ),
-            //     );
-            //   },
-            // ),
 
             //
             Positioned(
@@ -241,10 +201,10 @@ class _PostRepliesScreenState extends State<PostRepliesScreen> {
                             width: 80,
                             height: 80,
                             child: CircleWithFiveDirections(
-                              pointNorth: 0,
-                              pointWest: 0,
-                              pointSouth: 0,
-                              pointEast: 0,
+                              pointNorth: 'H',
+                              pointWest: 'P',
+                              pointSouth: '0',
+                              pointEast: '0',
                               mainCircleColor: Colors.yellow,
                             ),
                           ),
