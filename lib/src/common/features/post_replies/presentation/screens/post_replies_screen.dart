@@ -20,9 +20,9 @@ class _PostRepliesScreenState extends State<PostRepliesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final postProvider = Provider.of<PostReplyProvider>(context);
+    final postProvider = Provider.of<PostReplyProvider>(context, listen: true);
     final screenSize = MediaQuery.of(context).size;
-    //  final postReply = Provider.of<PostReplyProvider>(context, listen: false);
+    final postReply = Provider.of<PostReplyProvider>(context, listen: false);
 
     return Scaffold(
       // backgroundColor: Colors.black,
@@ -48,17 +48,19 @@ class _PostRepliesScreenState extends State<PostRepliesScreen> {
                                 .post[currentIndex ?? 0]
                                 .childVideoCount >
                             0) {
-                      // //passing feed id to post or replies provider
-                      // postReply.id =
-                      //     feedProvider.feeds[0].posts[currentIndex ?? 0].id;
-                      // postReply.loadMorePostReplies();
-                      // // Swiped right to left
-                      // Navigator.push(
-                      //   context,
-                      //   MaterialPageRoute(
-                      //     builder: (context) => PostRepliesScreen(),
-                      //   ),
-                      // );
+                      //passing feed id to post or replies provider
+                      postReply.id = postProvider
+                          .postReplies[0]
+                          .post[currentIndex ?? 0]
+                          .id;
+                      postReply.loadMorePostReplies();
+                      // Swiped right to left
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => PostRepliesScreen(),
+                        ),
+                      );
                     }
                   },
                   child: PageView.builder(
@@ -204,7 +206,14 @@ class _PostRepliesScreenState extends State<PostRepliesScreen> {
                               pointNorth: 'H',
                               pointWest: 'P',
                               pointSouth: '0',
-                              pointEast: '0',
+                              pointEast:
+                                  postProvider.postReplies.isNotEmpty &&
+                                      postProvider
+                                          .postReplies[0]
+                                          .post
+                                          .isNotEmpty
+                                  ? '${postProvider.postReplies[0].post[currentIndex ?? 0].childVideoCount}'
+                                  : '0',
                               mainCircleColor: Colors.yellow,
                             ),
                           ),
