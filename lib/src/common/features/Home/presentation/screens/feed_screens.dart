@@ -220,12 +220,6 @@ class _FeedScreenState extends State<FeedScreen> {
                                   : below != null
                                   ? below!
                                   : feedProvider.feeds[0].posts.length - 1,
-
-                              //  feedProvider.feeds.isNotEmpty
-                              //     ? below ?? 0
-                              //     : feedProvider.feeds.isNotEmpty
-                              //     ? feedProvider.feeds[0].posts.length - 1
-                              //     : 0,
                               pointEast: feedProvider.feeds.isNotEmpty
                                   ? feedProvider
                                         .feeds[0]
