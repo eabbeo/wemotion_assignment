@@ -64,41 +64,10 @@ class PostReplyProvider extends ChangeNotifier {
         ? replyLevels[currentLevel]
         : [];
   }
+
+   void clearAllLevels() {
+    replyLevels.clear();
+    currentLevel = 0;
+    notifyListeners();
+  }
 }
-
-// class PostReplyProvider extends ChangeNotifier {
-//   bool isLoading = false;
-//   List<List<RepliesModel>> postReplies = [];
-
-//   int? _id;
-
-//   int get id => _id!;
-
-//   set id(int newId) {
-//     _id = newId;
-//     notifyListeners();
-//   }
-
-//   static const baseUrl = AppConstants.baseUrl;
-
-//   final PostReplyServices api = PostReplyServices();
-
-//   Future<void> loadMorePostReplies() async {
-//     if (isLoading) return;
-//     isLoading = true;
-//     notifyListeners();
-
-//     try {
-//       final newPost = await api.fetchPostReplies(id);
-//       if (newPost != null) {
-//         postReplies.add([newPost]);
-//       }
-//       log(postReplies.toString());
-//     } catch (e) {
-//       throw Exception(e);
-//     } finally {
-//       isLoading = false;
-//       notifyListeners();
-//     }
-//   }
-// }
