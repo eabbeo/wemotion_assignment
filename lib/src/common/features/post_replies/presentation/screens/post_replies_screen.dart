@@ -1,15 +1,14 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:wemotion_mobile/src/common/features/Home/presentation/screens/feed_screens.dart';
 import 'package:wemotion_mobile/src/common/widgets/video_player_widget.dart';
 import 'package:wemotion_mobile/src/common/features/post_replies/data/provider/reply_provider.dart';
-import 'package:wemotion_mobile/src/common/utils/app_colors/app_colors.dart';
 import 'package:wemotion_mobile/src/common/widgets/circle_widget.dart';
-import 'package:page_transition/page_transition.dart';
+import 'package:wemotion_mobile/src/common/widgets/widget_button.dart';
 
 class PostRepliesScreen extends StatefulWidget {
-  const PostRepliesScreen({super.key});
+  final bool isNewLevel;
+  const PostRepliesScreen({super.key, this.isNewLevel = false});
 
   @override
   State<PostRepliesScreen> createState() => _PostRepliesScreenState();
@@ -19,219 +18,189 @@ class _PostRepliesScreenState extends State<PostRepliesScreen> {
   int? currentIndex;
   String? above;
   String? below;
+  final PageController _pageController = PageController();
+  bool _isLoadingNewContent = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController.addListener(_scrollListener);
+  }
+
+  @override
+  void dispose() {
+    _pageController.removeListener(_scrollListener);
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  void _scrollListener() {
+    if (_pageController.position.pixels ==
+        _pageController.position.minScrollExtent) {
+      // Handle top scroll position if needed
+    }
+  }
+
+  Future<void> _handleHorizontalSwipe(DragEndDetails details) async {
+    final postProvider = Provider.of<PostReplyProvider>(context, listen: false);
+    final currentReplies = postProvider.currentReplies;
+
+    if (details.primaryVelocity! < 0 &&
+        currentReplies.isNotEmpty &&
+        currentReplies[0].post[currentIndex ?? 0].childVideoCount > 0) {
+      setState(() => _isLoadingNewContent = true);
+
+      try {
+        postProvider.currentId = currentReplies[0].post[currentIndex ?? 0].id;
+        await postProvider.loadMorePostReplies(isNewLevel: true);
+
+        if (!mounted) return;
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PostRepliesScreen(isNewLevel: true),
+          ),
+        );
+      } catch (e) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error loading replies: $e')));
+      } finally {
+        if (mounted) {
+          setState(() => _isLoadingNewContent = false);
+        }
+      }
+    } else if (details.primaryVelocity! > 0) {
+      postProvider.goBackLevel();
+      Navigator.pop(context);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final postProvider = Provider.of<PostReplyProvider>(context, listen: true);
     final screenSize = MediaQuery.of(context).size;
-    final postReply = Provider.of<PostReplyProvider>(context, listen: false);
+    final currentReplies = postProvider.currentReplies;
+
+    // Show loading if this is a new level and data isn't ready yet
+    if (widget.isNewLevel &&
+        (postProvider.isLoading || currentReplies.isEmpty)) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
 
     return Scaffold(
-      // backgroundColor: Colors.black,
-      body: NotificationListener<ScrollNotification>(
-        onNotification: (scroll) {
-          if (scroll is ScrollEndNotification) {
-            if (scroll.metrics.pixels == scroll.metrics.minScrollExtent &&
-                currentIndex == null) {
-              // At top of first item
-              Navigator.push(
-                context,
-                PageTransition(
-                  type: PageTransitionType.topToBottom,
-                  child: FeedScreen(),
-                ),
-              );
+      body: Stack(
+        children: [
+          // Main content
+          PageView.builder(
+            scrollDirection: Axis.vertical,
+            itemCount: currentReplies.isNotEmpty
+                ? currentReplies[0].post.length
+                : 0,
+            controller: _pageController,
+            onPageChanged: (value) {
+              setState(() {
+                currentIndex = value;
+                if (currentReplies.isNotEmpty) {
+                  int totalPosts = currentReplies[0].post.length;
+                  above = currentIndex?.toString() ?? 'H';
+                  below = (totalPosts - currentIndex! - 1).toString();
+                }
+              });
+            },
+            itemBuilder: (context, index) {
               //
-            }
-          }
-          return false;
-        },
+              final isCurrentItem = currentIndex == index;
+              //
+              return GestureDetector(
+                onHorizontalDragEnd: _handleHorizontalSwipe,
+                child: currentReplies.isEmpty
+                    ? const Center(child: CircularProgressIndicator.adaptive())
+                    : VideoPlayerWidget(
+                        currentReplies[0].post[index].videoLink,
+                        autoPlay: true,
+                        isCurrentItem: isCurrentItem,
+                      ),
+              );
+            },
+          ),
 
-        child: Stack(
-          children: [
-            PageView.builder(
-              scrollDirection: Axis.vertical,
-              itemCount: postProvider.postReplies.length,
-              itemBuilder: (context, index) {
-                return GestureDetector(
-                  onHorizontalDragEnd: (details) {
-                    // Detect horizontal swipe direction
-                    if (details.primaryVelocity! < 0 &&
-                        postProvider
-                                .postReplies[0]
-                                .post[currentIndex ?? 0]
-                                .childVideoCount >
-                            0) {
-                      //passing feed id to post or replies provider
-                      postReply.id = postProvider
-                          .postReplies[0]
-                          .post[currentIndex ?? 0]
-                          .id;
-                      postReply.loadMorePostReplies();
-                      // Swiped right to left
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => PostRepliesScreen(),
-                        ),
-                      );
-                    } else if (details.primaryVelocity! > 0) {
-                      Navigator.pop(context);
-                    }
-                  },
+          // Loading overlay
+          if (_isLoadingNewContent)
+            const Center(child: CircularProgressIndicator()),
 
-                  child: PageView.builder(
-                    itemCount: postProvider.postReplies[0].post.length,
-                    scrollDirection: Axis.vertical,
-                    itemBuilder: (context, index) {
-                      return postProvider.postReplies.isEmpty
-                          ? Center(child: CircularProgressIndicator.adaptive())
-                          : VideoPlayerWidget(
-                              postProvider.postReplies[0].post[index].videoLink,
-                            );
-                    },
-                    onPageChanged: (value) {
-                      setState(() {
-                        currentIndex = value;
-                        int totalPosts =
-                            postProvider.postReplies[0].post.length;
-                        above = currentIndex?.toString() ?? 'H';
-                        below = (totalPosts - currentIndex! - 1).toString();
-                      });
-                    },
-                    // //
-                    // onVerticalDragEnd: (details) {
-                    //   // Detect upward swipe (negative velocity means upward movement)
-                    //   if (details.primaryVelocity! < -1000 &&
-                    //       currentIndex == 0) {
-                    //     // Strong upward swipe at first item
-                    //     Navigator.push(
-                    //       context,
-                    //       PageTransition(
-                    //         type: PageTransitionType.topToBottom,
-                    //         child: const FeedScreen(),
-                    //       ),
-                    //     );
-                    //   }
-                    // },
-                    //
-                  ),
-                );
-              },
-            ),
-
-            //
+          // Bottom UI controls
+          if (currentReplies.isNotEmpty && currentReplies[0].post.isNotEmpty)
             Positioned(
               bottom: 0,
               child: SizedBox(
                 width: screenSize.width,
-                // color: Colors.red,
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    //left design side
+                    // Left side (user info)
                     SizedBox(
                       width: screenSize.width * 0.7,
-
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Column(
-                          spacing: 3,
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Row(
-                              spacing: 5,
                               children: [
                                 ClipRRect(
-                                  borderRadius: BorderRadiusGeometry.circular(
-                                    50,
-                                  ),
+                                  borderRadius: BorderRadius.circular(50),
                                   child: CachedNetworkImage(
-                                    imageUrl:
-                                        postProvider.postReplies.isNotEmpty
-                                        ? postProvider
-                                              .postReplies[0]
-                                              .post[currentIndex ?? 0]
-                                              .pictureUrl
-                                        : '',
+                                    imageUrl: currentReplies[0]
+                                        .post[currentIndex ?? 0]
+                                        .pictureUrl,
                                     width: 40,
                                     height: 40,
+                                    errorWidget: (_, __, ___) =>
+                                        const CircleAvatar(
+                                          backgroundColor: Colors.grey,
+                                          child: Icon(Icons.person),
+                                        ),
                                   ),
                                 ),
-
+                                const SizedBox(width: 8),
                                 Text(
-                                  postProvider.postReplies.isNotEmpty
-                                      ? postProvider
-                                            .postReplies[0]
-                                            .post[currentIndex ?? 0]
-                                            .firstName
-                                      : '',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 15,
-                                  ),
-                                ),
-                                Text(
-                                  postProvider.postReplies.isNotEmpty
-                                      ? postProvider
-                                            .postReplies[0]
-                                            .post[currentIndex ?? 0]
-                                            .lastName
-                                      : '',
-                                  style: TextStyle(
+                                  '${currentReplies[0].post[currentIndex ?? 0].firstName} '
+                                  '${currentReplies[0].post[currentIndex ?? 0].lastName}',
+                                  style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 15,
                                   ),
                                 ),
                               ],
                             ),
-                            //
+                            const SizedBox(height: 8),
                             Text(
-                              postProvider.postReplies.isNotEmpty
-                                  ? postProvider
-                                        .postReplies[0]
-                                        .post[currentIndex ?? 0]
-                                        .title
-                                  : '',
-                              style: TextStyle(
+                              currentReplies[0].post[currentIndex ?? 0].title,
+                              style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 15,
                                 fontWeight: FontWeight.w500,
                               ),
-                              textAlign: TextAlign.left,
                             ),
-                            SizedBox(height: 25),
+                            const SizedBox(height: 25),
                           ],
                         ),
                       ),
                     ),
-                    //right design side
+
+                    // Right side (action buttons)
                     SizedBox(
                       width: screenSize.width * 0.3,
-                      //height: 100,
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        spacing: 15,
                         children: [
-                          CircleAvatar(
-                            backgroundColor: AppColors.greyColor.withValues(
-                              alpha: 0.5,
-                            ),
-                          ),
-                          CircleAvatar(
-                            backgroundColor: AppColors.greyColor.withValues(
-                              alpha: 0.5,
-                            ),
-                          ),
-                          CircleAvatar(
-                            backgroundColor: AppColors.greyColor.withValues(
-                              alpha: 0.5,
-                            ),
-                            child: Icon(
-                              Icons.more_vert,
-                              color: AppColors.whiteColor,
-                            ),
-                          ),
-                          SizedBox(height: 10),
+                          buildActionButton(Icons.favorite_border),
+                          const SizedBox(height: 5),
+                          buildActionButton(Icons.comment),
+                          const SizedBox(height: 5),
+                          buildActionButton(Icons.more_vert, isMore: true),
+                          const SizedBox(height: 5),
                           SizedBox(
                             width: 80,
                             height: 80,
@@ -241,28 +210,14 @@ class _PostRepliesScreenState extends State<PostRepliesScreen> {
                                   : above ?? 'H',
                               pointWest: 'P',
                               pointSouth:
-                                  postProvider.postReplies.isEmpty ||
-                                      postProvider
-                                              .postReplies[0]
-                                              .post
-                                              .isEmpty &&
-                                          below == ''
-                                  ? '0'
-                                  : below != null
-                                  ? below!
-                                  : '${postProvider.postReplies[0].post.length - 1}',
+                                  below ??
+                                  '${currentReplies[0].post.length - 1}',
                               pointEast:
-                                  postProvider.postReplies.isNotEmpty &&
-                                      postProvider
-                                          .postReplies[0]
-                                          .post
-                                          .isNotEmpty
-                                  ? '${postProvider.postReplies[0].post[currentIndex ?? 0].childVideoCount}'
-                                  : '0',
+                                  '${currentReplies[0].post[currentIndex ?? 0].childVideoCount}',
                               mainCircleColor: Colors.yellow,
                             ),
                           ),
-                          SizedBox(height: 10),
+                          const SizedBox(height: 10),
                         ],
                       ),
                     ),
@@ -270,10 +225,7 @@ class _PostRepliesScreenState extends State<PostRepliesScreen> {
                 ),
               ),
             ),
-
-            //
-          ],
-        ),
+        ],
       ),
     );
   }

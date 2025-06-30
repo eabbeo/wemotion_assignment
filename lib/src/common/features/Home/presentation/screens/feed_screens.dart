@@ -5,8 +5,8 @@ import 'package:wemotion_mobile/src/common/features/Home/data/provider/feed_prov
 import 'package:wemotion_mobile/src/common/widgets/video_player_widget.dart';
 import 'package:wemotion_mobile/src/common/features/post_replies/data/provider/reply_provider.dart';
 import 'package:wemotion_mobile/src/common/features/post_replies/presentation/screens/post_replies_screen.dart';
-import 'package:wemotion_mobile/src/common/utils/app_colors/app_colors.dart';
 import 'package:wemotion_mobile/src/common/widgets/circle_widget.dart';
+import 'package:wemotion_mobile/src/common/widgets/widget_button.dart';
 
 class FeedScreen extends StatefulWidget {
   const FeedScreen({super.key});
@@ -25,6 +25,14 @@ class _FeedScreenState extends State<FeedScreen> {
       if (!mounted) return;
       final feedProvider = Provider.of<FeedProvider>(context, listen: false);
       feedProvider.loadMoreFeeds();
+    });
+    //
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final postProvider = Provider.of<PostReplyProvider>(
+        context,
+        listen: false,
+      );
+      postProvider.clearAllLevels();
     });
 
     super.initState();
@@ -63,8 +71,9 @@ class _FeedScreenState extends State<FeedScreen> {
                                   .posts[currentIndex ?? 0]
                                   .childVideoCount >
                               0) {
+                        postReply.clearAllLevels();
                         //passing feed id to post or replies provider
-                        postReply.id =
+                        postReply.currentId =
                             feedProvider.feeds[0].posts[currentIndex ?? 0].id;
                         postReply.loadMorePostReplies();
                         // Swiped right to left
@@ -192,25 +201,13 @@ class _FeedScreenState extends State<FeedScreen> {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           spacing: 15,
                           children: [
-                            CircleAvatar(
-                              backgroundColor: AppColors.greyColor.withValues(
-                                alpha: 0.5,
-                              ),
-                            ),
-                            CircleAvatar(
-                              backgroundColor: AppColors.greyColor.withValues(
-                                alpha: 0.5,
-                              ),
-                            ),
-                            CircleAvatar(
-                              backgroundColor: AppColors.greyColor.withValues(
-                                alpha: 0.5,
-                              ),
-                              child: Icon(
-                                Icons.more_vert,
-                                color: AppColors.whiteColor,
-                              ),
-                            ),
+                            buildActionButton(Icons.favorite_border),
+                            const SizedBox(height: 5),
+                            buildActionButton(Icons.comment),
+                            const SizedBox(height: 55),
+                            buildActionButton(Icons.more_vert, isMore: true),
+                            const SizedBox(height: 5),
+                          
                             SizedBox(height: 10),
                             SizedBox(
                               width: 80,
