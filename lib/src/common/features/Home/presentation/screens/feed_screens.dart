@@ -64,7 +64,7 @@ class _FeedScreenState extends State<FeedScreen> {
                                   .childVideoCount >
                               0) {
                         //passing feed id to post or replies provider
-                        postReply.id =
+                        postReply.currentId =
                             feedProvider.feeds[0].posts[currentIndex ?? 0].id;
                         postReply.loadMorePostReplies();
                         // Swiped right to left

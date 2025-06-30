@@ -9,7 +9,8 @@ import 'package:wemotion_mobile/src/common/widgets/circle_widget.dart';
 import 'package:page_transition/page_transition.dart';
 
 class PostRepliesScreen extends StatefulWidget {
-  const PostRepliesScreen({super.key});
+  final bool isNewLevel;
+  const PostRepliesScreen({super.key, this.isNewLevel = false});
 
   @override
   State<PostRepliesScreen> createState() => _PostRepliesScreenState();
@@ -19,12 +20,13 @@ class _PostRepliesScreenState extends State<PostRepliesScreen> {
   int? currentIndex;
   String? above;
   String? below;
+  final PageController _pageController = PageController();
 
   @override
   Widget build(BuildContext context) {
     final postProvider = Provider.of<PostReplyProvider>(context, listen: true);
     final screenSize = MediaQuery.of(context).size;
-    final postReply = Provider.of<PostReplyProvider>(context, listen: false);
+    final currentReplies = postProvider.currentReplies;
 
     return Scaffold(
       // backgroundColor: Colors.black,
@@ -51,71 +53,52 @@ class _PostRepliesScreenState extends State<PostRepliesScreen> {
           children: [
             PageView.builder(
               scrollDirection: Axis.vertical,
-              itemCount: postProvider.postReplies.length,
+              itemCount: currentReplies.isNotEmpty
+                  ? currentReplies[0].post.length
+                  : 0,
+              controller: _pageController,
+              onPageChanged: (value) {
+                setState(() {
+                  currentIndex = value;
+                  if (currentReplies.isNotEmpty) {
+                    int totalPosts = currentReplies[0].post.length;
+                    above = currentIndex?.toString() ?? 'H';
+                    below = (totalPosts - currentIndex! - 1).toString();
+                  }
+                });
+              },
               itemBuilder: (context, index) {
                 return GestureDetector(
                   onHorizontalDragEnd: (details) {
-                    // Detect horizontal swipe direction
                     if (details.primaryVelocity! < 0 &&
-                        postProvider
-                                .postReplies[0]
+                        currentReplies.isNotEmpty &&
+                        currentReplies[0]
                                 .post[currentIndex ?? 0]
                                 .childVideoCount >
                             0) {
-                      //passing feed id to post or replies provider
-                      postReply.id = postProvider
-                          .postReplies[0]
-                          .post[currentIndex ?? 0]
-                          .id;
-                      postReply.loadMorePostReplies();
-                      // Swiped right to left
+                      postProvider.currentId =
+                          currentReplies[0].post[currentIndex ?? 0].id;
+                      postProvider.loadMorePostReplies(isNewLevel: true);
+
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => PostRepliesScreen(),
+                          builder: (context) =>
+                              PostRepliesScreen(isNewLevel: true),
                         ),
                       );
                     } else if (details.primaryVelocity! > 0) {
+                      postProvider.goBackLevel();
                       Navigator.pop(context);
                     }
                   },
-
-                  child: PageView.builder(
-                    itemCount: postProvider.postReplies[0].post.length,
-                    scrollDirection: Axis.vertical,
-                    itemBuilder: (context, index) {
-                      return postProvider.postReplies.isEmpty
-                          ? Center(child: CircularProgressIndicator.adaptive())
-                          : VideoPlayerWidget(
-                              postProvider.postReplies[0].post[index].videoLink,
-                            );
-                    },
-                    onPageChanged: (value) {
-                      setState(() {
-                        currentIndex = value;
-                        int totalPosts =
-                            postProvider.postReplies[0].post.length;
-                        above = currentIndex?.toString() ?? 'H';
-                        below = (totalPosts - currentIndex! - 1).toString();
-                      });
-                    },
-                    // //
-                    // onVerticalDragEnd: (details) {
-                    //   // Detect upward swipe (negative velocity means upward movement)
-                    //   if (details.primaryVelocity! < -1000 &&
-                    //       currentIndex == 0) {
-                    //     // Strong upward swipe at first item
-                    //     Navigator.push(
-                    //       context,
-                    //       PageTransition(
-                    //         type: PageTransitionType.topToBottom,
-                    //         child: const FeedScreen(),
-                    //       ),
-                    //     );
-                    //   }
-                    // },
-                    //
-                  ),
+                  child: currentReplies.isEmpty
+                      ? const Center(
+                          child: CircularProgressIndicator.adaptive(),
+                        )
+                      : VideoPlayerWidget(
+                          currentReplies[0].post[index].videoLink,
+                        ),
                 );
               },
             ),
@@ -146,10 +129,8 @@ class _PostRepliesScreenState extends State<PostRepliesScreen> {
                                     50,
                                   ),
                                   child: CachedNetworkImage(
-                                    imageUrl:
-                                        postProvider.postReplies.isNotEmpty
-                                        ? postProvider
-                                              .postReplies[0]
+                                    imageUrl: currentReplies.isNotEmpty
+                                        ? currentReplies[0]
                                               .post[currentIndex ?? 0]
                                               .pictureUrl
                                         : '',
@@ -159,9 +140,8 @@ class _PostRepliesScreenState extends State<PostRepliesScreen> {
                                 ),
 
                                 Text(
-                                  postProvider.postReplies.isNotEmpty
-                                      ? postProvider
-                                            .postReplies[0]
+                                  currentReplies.isNotEmpty
+                                      ? currentReplies[0]
                                             .post[currentIndex ?? 0]
                                             .firstName
                                       : '',
@@ -171,9 +151,8 @@ class _PostRepliesScreenState extends State<PostRepliesScreen> {
                                   ),
                                 ),
                                 Text(
-                                  postProvider.postReplies.isNotEmpty
-                                      ? postProvider
-                                            .postReplies[0]
+                                  currentReplies.isNotEmpty
+                                      ? currentReplies[0]
                                             .post[currentIndex ?? 0]
                                             .lastName
                                       : '',
@@ -186,9 +165,8 @@ class _PostRepliesScreenState extends State<PostRepliesScreen> {
                             ),
                             //
                             Text(
-                              postProvider.postReplies.isNotEmpty
-                                  ? postProvider
-                                        .postReplies[0]
+                              currentReplies.isNotEmpty
+                                  ? currentReplies[0]
                                         .post[currentIndex ?? 0]
                                         .title
                                   : '',
@@ -240,24 +218,13 @@ class _PostRepliesScreenState extends State<PostRepliesScreen> {
                                   ? 'H'
                                   : above ?? 'H',
                               pointWest: 'P',
-                              pointSouth:
-                                  postProvider.postReplies.isEmpty ||
-                                      postProvider
-                                              .postReplies[0]
-                                              .post
-                                              .isEmpty &&
-                                          below == ''
+                              pointSouth: currentReplies.isEmpty && below == ''
                                   ? '0'
                                   : below != null
                                   ? below!
-                                  : '${postProvider.postReplies[0].post.length - 1}',
-                              pointEast:
-                                  postProvider.postReplies.isNotEmpty &&
-                                      postProvider
-                                          .postReplies[0]
-                                          .post
-                                          .isNotEmpty
-                                  ? '${postProvider.postReplies[0].post[currentIndex ?? 0].childVideoCount}'
+                                  : '${currentReplies[0].post.length - 1}',
+                              pointEast: currentReplies.isNotEmpty
+                                  ? '${currentReplies[0].post[currentIndex ?? 0].childVideoCount}'
                                   : '0',
                               mainCircleColor: Colors.yellow,
                             ),
