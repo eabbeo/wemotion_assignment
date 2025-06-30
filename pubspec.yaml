@@ -39,6 +39,7 @@ dependencies:
   http: ^1.4.0
   cached_video_player_plus: ^3.0.3
   cached_network_image: ^3.4.1
+  page_transition: ^2.2.1
 
 dev_dependencies:
   flutter_test:

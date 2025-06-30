@@ -1,10 +1,12 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:wemotion_mobile/src/common/features/Home/presentation/screens/feed_screens.dart';
 import 'package:wemotion_mobile/src/common/widgets/video_player_widget.dart';
 import 'package:wemotion_mobile/src/common/features/post_replies/data/provider/reply_provider.dart';
 import 'package:wemotion_mobile/src/common/utils/app_colors/app_colors.dart';
 import 'package:wemotion_mobile/src/common/widgets/circle_widget.dart';
+import 'package:page_transition/page_transition.dart';
 
 class PostRepliesScreen extends StatefulWidget {
   const PostRepliesScreen({super.key});
@@ -28,11 +30,23 @@ class _PostRepliesScreenState extends State<PostRepliesScreen> {
       // backgroundColor: Colors.black,
       body: NotificationListener<ScrollNotification>(
         onNotification: (scroll) {
-          if (scroll.metrics.pixels == scroll.metrics.maxScrollExtent) {
-            // postProvider.loadMorePostReplies();
+          if (scroll is ScrollEndNotification) {
+            if (scroll.metrics.pixels == scroll.metrics.minScrollExtent &&
+                currentIndex == null) {
+              // At top of first item
+              Navigator.push(
+                context,
+                PageTransition(
+                  type: PageTransitionType.topToBottom,
+                  child: FeedScreen(),
+                ),
+              );
+              //
+            }
           }
-          return true;
+          return false;
         },
+
         child: Stack(
           children: [
             PageView.builder(
@@ -61,8 +75,11 @@ class _PostRepliesScreenState extends State<PostRepliesScreen> {
                           builder: (context) => PostRepliesScreen(),
                         ),
                       );
+                    } else if (details.primaryVelocity! > 0) {
+                      Navigator.pop(context);
                     }
                   },
+
                   child: PageView.builder(
                     itemCount: postProvider.postReplies[0].post.length,
                     scrollDirection: Axis.vertical,
@@ -78,10 +95,26 @@ class _PostRepliesScreenState extends State<PostRepliesScreen> {
                         currentIndex = value;
                         int totalPosts =
                             postProvider.postReplies[0].post.length;
-                        above = currentIndex!.toString();
+                        above = currentIndex?.toString() ?? 'H';
                         below = (totalPosts - currentIndex! - 1).toString();
                       });
                     },
+                    // //
+                    // onVerticalDragEnd: (details) {
+                    //   // Detect upward swipe (negative velocity means upward movement)
+                    //   if (details.primaryVelocity! < -1000 &&
+                    //       currentIndex == 0) {
+                    //     // Strong upward swipe at first item
+                    //     Navigator.push(
+                    //       context,
+                    //       PageTransition(
+                    //         type: PageTransitionType.topToBottom,
+                    //         child: const FeedScreen(),
+                    //       ),
+                    //     );
+                    //   }
+                    // },
+                    //
                   ),
                 );
               },
@@ -203,9 +236,21 @@ class _PostRepliesScreenState extends State<PostRepliesScreen> {
                             width: 80,
                             height: 80,
                             child: CircleWithFiveDirections(
-                              pointNorth: 'H',
+                              pointNorth: above == '' || above == '0'
+                                  ? 'H'
+                                  : above ?? 'H',
                               pointWest: 'P',
-                              pointSouth: '0',
+                              pointSouth:
+                                  postProvider.postReplies.isEmpty ||
+                                      postProvider
+                                              .postReplies[0]
+                                              .post
+                                              .isEmpty &&
+                                          below == ''
+                                  ? '0'
+                                  : below != null
+                                  ? below!
+                                  : '${postProvider.postReplies[0].post.length - 1}',
                               pointEast:
                                   postProvider.postReplies.isNotEmpty &&
                                       postProvider
